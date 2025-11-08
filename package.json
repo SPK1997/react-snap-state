@@ -1,0 +1,27 @@
+{
+  "name": "react-snap-state",
+  "version": "0.1.0",
+  "description": "lighweight state management using keys in react",
+  "main": "dist/main.bundle.js",
+  "types": "dist/types/index.d.ts",
+  "scripts": {
+    "build": "npx tsc && webpack --config webpack.config.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@babel/core": "^7.28.5",
+    "@babel/preset-env": "^7.28.5",
+    "@babel/preset-react": "^7.28.5",
+    "@babel/preset-typescript": "^7.28.5",
+    "@types/react": "^19.2.2",
+    "babel-loader": "^10.0.0",
+    "webpack": "^5.102.1",
+    "webpack-cli": "^6.0.1"
+  },
+  "dependencies": {
+    "react": "^19.2.0"
+  }
+}

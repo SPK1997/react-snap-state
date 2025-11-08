@@ -1,15 +1,16 @@
 {
   "name": "react-snap-state",
   "version": "0.1.0",
-  "description": "lighweight state management using keys in react",
+  "description": "Lighweight state management using keys in react",
   "main": "dist/main.bundle.js",
   "types": "dist/types/index.d.ts",
+  "author": "SPK1997",
+  "files": ["dist", "Readme.md"],
   "scripts": {
-    "build": "npx tsc && webpack --config webpack.config.js"
+    "build": "rm -rf dist && npx tsc && webpack --config webpack.config.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["react", "state-management", "store", "useSyncExternalStore"],
+  "license": "MIT",
   "type": "module",
   "devDependencies": {
     "@babel/core": "^7.28.5",

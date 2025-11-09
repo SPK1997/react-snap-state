@@ -1,6 +1,6 @@
 # ⚡ react-snap-state
 
-A **tiny, fast, and reactive state management library for React 18+**, built on top of `useSyncExternalStore`.  
+A **tiny, fast, and reactive state management library for React 17+**, built on top of `useSyncExternalStore`.  
 `react-snap-state` provides **key-based subscriptions**, **no context re-renders**, and a super simple API that feels like React itself.
 
 ---

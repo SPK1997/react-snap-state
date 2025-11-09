@@ -13,7 +13,7 @@ export class KeyStore {
   set(key: string, val: any, comparator?:((a: any, b:any) => boolean) | null) {
     const prev = this.state.get(key);
     if(comparator && comparator(prev, val)) return;
-    if (Object.is(prev, val)) return;
+    if (!comparator && Object.is(prev, val)) return;
     this.state.set(key, val);
     this.emitKey(key);
   }

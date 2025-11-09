@@ -1,3 +1,5 @@
+import { isObjectLiteral } from "./helper";
+
 type Listener = () => void;
 
 export class KeyStore {
@@ -5,7 +7,15 @@ export class KeyStore {
   private keyListeners = new Map<string, Set<Listener>>();
 
   constructor(initial?: Record<string, any>) {
-    if (initial) for (const k of Object.keys(initial)) this.state.set(k, initial[k]);
+    if(initial) {
+      if(isObjectLiteral(initial)) {
+        for (const k of Object.keys(initial)) {
+          this.state.set(k, initial[k])
+        }
+      } else {
+        throw new Error('Initial state must be a plain object (e.g. {count: 0})');
+      }
+    }
   }
 
   get(key: string): any | undefined { return this.state.get(key); }

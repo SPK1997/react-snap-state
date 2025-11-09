@@ -28,7 +28,7 @@ export function useGetValue({
 
 export function useSetValue() {
   const store = useStoreInstance();
-  return useCallback(({ key, value }: { key: string; value: any }) => {
-    store.set(key, value);
+  return useCallback(({ key, value, comparator = null }: { key: string; value: any; comparator?:((a: any, b:any) => boolean) | null }) => {
+    store.set(key, value, comparator);
   },[store]);
 }

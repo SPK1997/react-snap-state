@@ -1,4 +1,4 @@
-export type Listener = () => void;
+type Listener = () => void;
 
 export class KeyStore {
   private state = new Map<string, any>();
@@ -10,8 +10,9 @@ export class KeyStore {
 
   get(key: string): any | undefined { return this.state.get(key); }
 
-  set(key: string, val: any) {
+  set(key: string, val: any, comparator?:((a: any, b:any) => boolean) | null) {
     const prev = this.state.get(key);
+    if(comparator && comparator(prev, val)) return;
     if (Object.is(prev, val)) return;
     this.state.set(key, val);
     this.emitKey(key);

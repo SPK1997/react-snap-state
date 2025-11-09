@@ -153,13 +153,22 @@ const value = useGetValue({ key: "count" });
 
 - Returns a function which is used to write a value to the store.
 - If the new value differs (by reference), subscribers of that key are notified.
+- optionally a custom comparator callback function can be passed to control how equality is checked.
+- If custom comparator is provided the default reference comparison will be skipped. 
 
 ```tsx
 const setValue = useSetValue();
-setValue({ key: "theme", value: "dark" });
+
+// Basic Usage
+setValue({ key: "theme", value: "dark" }); 
+
+// With a custom comparator
+setValue({ key: "theme", value: "red", comparator: (old, new) => return old === new }); 
 ```
 
-| Option  | Type     | Description       |
-| ------- | -------- | ----------------- |
-| `key`   | `string` | Key to update.    |
-| `value` | `any`    | New value to set. |
+| Option       | Type                                        | Description                                                                                                                                      |
+| ------------ | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `key`        | `string`                                    | The key in the store to update.                                                                                                                  |
+| `value`      | `any`                                       | The new value to assign.                                                                                                                         |
+| `comparator` | `(oldValue: any, newValue: any) => boolean` | *(Optional)* Custom comparator to determine equality. Return `true` if values are considered equal (no update), or `false` to trigger an update. |
+

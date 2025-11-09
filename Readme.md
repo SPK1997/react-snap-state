@@ -34,10 +34,11 @@ import { StoreProvider, useGetValue, useSetValue } from "react-snap-state";
 
 function Counter() {
   const count = useGetValue({ key: "count" });
+  const setValue = useSetValue();
 
-  const increment = () => useSetValue({ key: "count", value: (count ?? 0) + 1 });
-  const decrement = () => useSetValue({ key: "count", value: (count ?? 0) - 1 });
-  const reset = () => useSetValue({ key: "count", value: 0 });
+  const increment = () => setValue({ key: "count", value: (count ?? 0) + 1 });
+  const decrement = () => setValue({ key: "count", value: (count ?? 0) - 1 });
+  const reset = () => setValue({ key: "count", value: 0 });
 
   return (
     <div style={{ textAlign: "center" }}>
@@ -108,8 +109,10 @@ const staticValue = useGetValue({ key: "count", reactive: false });
 ```tsx
 import { useSetValue } from "react-snap-state";
 
+const setValue = useSetValue();
+
 function UpdateButton() {
-  useSetValue({ key: "status", value: "active" });
+  setValue({ key: "status", value: "active" });
   return null;
 }
 ```
@@ -145,13 +148,14 @@ const value = useGetValue({ key: "count" });
 | `key`      | `string`  | —       | Key to read from the store.       |
 | `reactive` | `boolean` | `true`  | Subscribe to key updates if true. |
 
-### ✏️ useSetValue({ key, value })
+### ✏️ useSetValue()
 
-- Writes a value to the store.
+- Returns a function which is used to write a value to the store.
 - If the new value differs (by reference), subscribers of that key are notified.
 
 ```tsx
-useSetValue({ key: "theme", value: "dark" });
+const setValue = useSetValue();
+setValue({ key: "theme", value: "dark" });
 ```
 
 | Option  | Type     | Description       |

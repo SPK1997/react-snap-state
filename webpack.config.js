@@ -37,5 +37,5 @@ export default {
             }
         ]
     },
-    externals: {react: 'react', 'react-dom': 'react-dom'}
+    externals: {'react': 'react', 'react-dom': 'react-dom', 'react/jsx-runtime': 'react/jsx-runtime', 'react/jsx-dev-runtime': 'react/jsx-dev-runtime'}
 }

@@ -60,7 +60,8 @@ export default function App() {
 ```
 
 - Result: Only the Counter component re-renders when count changes.
-No context re-renders, no prop drilling, no boilerplate.
+- No context re-renders, no prop drilling, no boilerplate.
+- Try it out: https://codesandbox.io/p/sandbox/k7y9qj
 
 ---
 

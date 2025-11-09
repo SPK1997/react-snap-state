@@ -12,7 +12,7 @@ A **tiny, fast, and reactive state management library for React 17+**, built on 
 - 💡 **No context re-renders** – The context never changes; only subscribed components update.
 - 🧩 **Minimal API** – Just `StoreProvider`, `useGetValue`, and `useSetValue`.
 - ⚙️ **TypeScript-first** – Fully typed, auto-completion friendly.
-- ⚡ **Lightweight** – Around 8KB of unpacked size.
+- ⚡ **Lightweight** – Less than 15KB of unpacked size.
 
 ---
 

@@ -29,14 +29,21 @@ npm install react-snap-state
 - Here’s a full working React counter app using react-snap-state 👇
 
 ```tsx
-import React from "react";
 import { StoreProvider, useGetValue, useSetValue } from "react-snap-state";
 
 function Counter() {
   const count = useGetValue({ key: "count" });
   const setValue = useSetValue();
 
-  const increment = () => setValue({ key: "count", value: (count ?? 0) + 1 });
+  // with custom comparator function (check Readme for API documentation)
+  const increment = () =>
+    setValue({
+      key: "count",
+      value: (count ?? 0) + 1,
+      comparator: (oldValue: number, newValue: number) => oldValue === newValue,
+    });
+
+  // without custom comparator function (check Readme for API documentation)
   const decrement = () => setValue({ key: "count", value: (count ?? 0) - 1 });
   const reset = () => setValue({ key: "count", value: 0 });
 

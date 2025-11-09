@@ -1,4 +1,4 @@
-import { useContext, useMemo } from "react";
+import { useCallback, useContext } from "react";
 import { useSyncExternalStore } from "use-sync-external-store/shim";
 import { StoreContext } from "./context";
 
@@ -18,7 +18,7 @@ export function useGetValue({
   const store = useStoreInstance();
   if (!reactive) return store.get(key);
 
-  const getSnap = useMemo(() => () => store.get(key), [store, key]);
+  const getSnap = useCallback(() => store.get(key), [store, key]);
   return useSyncExternalStore(
     (l) => store.subscribeKey(key, l),
     getSnap,
@@ -26,9 +26,9 @@ export function useGetValue({
   );
 }
 
-export function useSetValue({ key, value }: { key: string; value: any }) {
+export function useSetValue() {
   const store = useStoreInstance();
-  return () => {
+  return useCallback(({ key, value }: { key: string; value: any }) => {
     store.set(key, value);
-  }
+  },[store]);
 }

@@ -28,5 +28,7 @@ export function useGetValue({
 
 export function useSetValue({ key, value }: { key: string; value: any }) {
   const store = useStoreInstance();
-  store.set(key, value);
+  return () => {
+    store.set(key, value);
+  }
 }

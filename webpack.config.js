@@ -5,7 +5,11 @@ export default {
     output: {
         path: path.resolve('dist'),
         filename: '[name].bundle.js',
-        chunkFilename: "[name].chunk.js"
+        library: {
+            name: 'react-snap-state',
+            type: 'umd'
+        },
+        globalObject: 'globalThis'
     },
     resolve: {
         extensions: ['.tsx','.ts','.jsx', '.js']
@@ -32,5 +36,6 @@ export default {
                 }
             }
         ]
-    }
+    },
+    externals: {react: 'react', 'react-dom': 'react-dom'}
 }

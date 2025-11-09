@@ -1,5 +1,5 @@
 import { useContext, useMemo } from "react";
-import { useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "use-sync-external-store/shim";
 import { StoreContext } from "./context";
 
 function useStoreInstance() {
@@ -8,9 +8,13 @@ function useStoreInstance() {
   return store;
 }
 
-export function useGetValue (
-  { key, reactive = true }: { key: string; reactive?: boolean }
-): any | undefined {
+export function useGetValue({
+  key,
+  reactive = true,
+}: {
+  key: string;
+  reactive?: boolean;
+}): any | undefined {
   const store = useStoreInstance();
   if (!reactive) return store.get(key);
 
@@ -22,7 +26,7 @@ export function useGetValue (
   );
 }
 
-export function useSetValue({key, value}: {key: string, value: any}) {
+export function useSetValue({ key, value }: { key: string; value: any }) {
   const store = useStoreInstance();
   store.set(key, value);
 }

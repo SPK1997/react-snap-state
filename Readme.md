@@ -159,9 +159,9 @@ const value = useGetValue({ key: "count" });
 ### ✏️ useSetValue()
 
 - Returns a function which is used to write a value to the store.
-- If the new value differs (by reference), subscribers of that key are notified.
+- If the new value differs (by reference for non-primitives and by value for primitives), subscribers of that key are notified.
 - optionally a custom comparator callback function can be passed to control how equality is checked.
-- If custom comparator is provided the default reference comparison will be skipped. 
+- If custom comparator is provided the default comparison will be skipped. 
 
 ```tsx
 const setValue = useSetValue();
@@ -170,7 +170,7 @@ const setValue = useSetValue();
 setValue({ key: "theme", value: "dark" }); 
 
 // With a custom comparator
-setValue({ key: "theme", value: "red", comparator: (old, new) => return old === new }); 
+setValue({ key: "theme", value: "red", comparator: (old: string, new: string) => return old === new }); 
 ```
 
 | Option       | Type                                        | Description                                                                                                                                      |

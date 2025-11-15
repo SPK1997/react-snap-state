@@ -44,8 +44,14 @@ function Counter() {
 
   // useDeriveValue (single key) — returns boolean whether count is even
   const isEven = useDeriveValue(
-    "count",
-    (c: number | undefined) => (typeof c === "number" ? c % 2 === 0 : true),
+    ["count"],
+    (c: number[]) => {
+      let number = c[0];
+      if(number % 2 === 0) {
+        return true;
+      }
+      return false;
+    },
     (prev: boolean, next: boolean) => prev === next // optional comparator (strict equality)
   );
 
@@ -170,14 +176,14 @@ const value2 = useGetValue("age", (before: number, after: number) => {return bef
 | `key`         | `string`  | Key to read from the store.       |
 | `comparator`  | `(oldValue: any, newValue: any) => boolean` | (Optional) Custom comparator to determine equality. Return true if values are considered equal (no update), or false to trigger an update. |
 
-### 🛠️ useDeriveValue(key (or keys), derive, comparator?)
+### 🛠️ useDeriveValue(keys, derive, comparator?)
 - useDeriveValue lets your component compute a derived value from one or more store keys and automatically subscribe to updates for all of them.
 
 - Whenever any of the source key values change, the hook will trigger a component re-render, unless a custom comparator determines that the derived output is equal to the previous one.
 
 - ✔ What it does?
-  - Accepts either a single key or an array of keys.
-  - Reads the current value(s) of the key(s) from the store.
+  - Accepts an array of keys.
+  - Reads the current values of the keys from the store.
   - Passes those values into your derive callback function.
   - Returns whatever the derive callback returns.
   - Automatically subscribes to updates of all referenced keys.
@@ -194,26 +200,21 @@ const value2 = useGetValue("age", (before: number, after: number) => {return bef
 ```tsx
 import {useDeriveValue} from 'react-snap-state';
 
-// derive from single key
-const fullName = useDeriveValue("user", (user) => {
-  return `${user.firstName} ${user.lastName}`;
-});
-
-// derive from multiple keys
+// derive without comparator
 const total = useDeriveValue(["price", "tax"], ([price, tax]) => {
   return price + tax;
 });
 
 // derive with a comparator
 const ageStatus = useDeriveValue(
-  "age",
+  ["age"],
   (age) => (age >= 18 ? "adult" : "minor"),
   (prev, next) => prev === next // comparator
 );
 ```
 | Arguments       | Type                                                     | Description                                                                                                                        |
 | -------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `key` / `keys` | `string` or `string[]`                                    | A single key or an array of keys to read from the store. Their values will be passed to the derive callback.                       |
+| `keys` | `string[]`                                    | An array of keys to read from the store. Their values will be passed to the derive callback.                       |
 | `derive`       | `(value: any \| any[]) => any`                           | A function that receives the value(s) of the key(s) and returns the derived value.                                                 |
 | `comparator`   | `(oldValue: any, newValue: any) => boolean`| (Optional) Custom equality check for the **derived value**. Return `true` if values are equal (skip update), or `false` to trigger an update. |
 

@@ -9,6 +9,7 @@ type keyValue = {
 export class KeyStore {
   private state = new Map<string, keyValue>();
   private keyReaders = new Map<string, Set<Reader>>();
+  private pending = new Map<string, number>();
 
   constructor(initial?: Record<string, any>) {
     if (initial) {
@@ -27,8 +28,22 @@ export class KeyStore {
     }
   }
 
+  removeAsyncProcessId(key: string) {
+    this.pending.delete(key);
+  }
+
+  updateAsyncProcessId(key: string) {
+    let value = (this.pending.get(key) || 0) + 1;
+    this.pending.set(key, value);
+    return value;
+  }
+
+  getAsyncProcessId(key: string) {
+    return this.pending.get(key);
+  }
+
   setCurrentValue(key: string, value: any) {
-    if(this.state.has(key)) {
+    if (this.state.has(key)) {
       (this.state.get(key) as keyValue).current = value;
     }
   }

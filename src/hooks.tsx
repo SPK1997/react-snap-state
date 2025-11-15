@@ -62,11 +62,15 @@ export function useSetValue() {
     if(placeholderValue) {
       store.set(key, placeholderValue);
     }
+    const id = store.updateAsyncProcessId(key)
     try {
       let value = await callback();
-      store.set(key, value);
+      if(id === store.getAsyncProcessId(key)) {
+        store.removeAsyncProcessId(key);
+        store.set(key, value);
+      }
     } catch(err) {
-      console.log(new Error(`async setter failed, ${err}`));
+      console.log(new Error(`async setter failed for key ${key}, ${err}`));
     }
   };
   return useCallback(setter,[store]);

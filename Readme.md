@@ -311,6 +311,8 @@ setValue("age", 45);
 
 - When the async helper is used, the store is updated with the placeholder (if provided) immediately, then updated with the async result when the call resolves; subscribed components re-render on each effective value change. Errors are caught and logged — the async helper does not re-throw.
 
+- *Handling Race Condition:* If multiple async setters are called for the same key, the most recent call wins. When an async setter is called it receives an internal process id. Only the call whose id matches the store's current id for that key is allowed to write the final value. Older (stale) resolutions are ignored. This guarantees that the latest user intent is preserved even if earlier requests resolve later.
+
 ```tsx
 import {useSetValue} from 'react-snap-state';
 

@@ -132,8 +132,13 @@ export default function App() {
 
 - This is possible using useSetValue hook.
 - Check its API in API reference section.
-
 ---
+## ⏳ Updating State asynchronously
+
+- This is possible using async setters.
+- Check its API in API reference section.
+---
+
 ## 🧩 API Reference
 
 ### 🏗️ `<StoreProvider />`
@@ -244,5 +249,36 @@ setValue("age", 45);
 | Arguments       | Type                                        | Description                                                                                                                                      |
 | ------------ | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `key`        | `string`                                    | The key in the store to update.                                                                                                                  |
-| `value`      | `any`                                       | The new value to assign.                                                                                                                  
+| `value`      | `any`                                       | The new value to assign.                                                                                                                 
+
+### ⏳ Async setter (setter.async)
+
+- useSetValue hook returns a stable setter function and an async helper (setter.async) for async updates.
+
+- Use the async helper to optionally set a temporary placeholder value, run an async operation, and write the final result back into the store.
+
+- When the async helper is used, the store is updated with the placeholder (if provided) immediately, then updated with the async result when the call resolves; subscribed components re-render on each effective value change. Errors are caught and logged — the async helper does not re-throw.
+
+```tsx
+import {useSetValue} from 'react-snap-state';
+
+const setValue = useSetValue();
+
+// async write with placeholder
+setValue.async(
+  "user",
+  async () => {
+    const res = await fetch("/api/me");
+    return await res.json();
+  },
+  { id: 0, name: "Loading…" } // optional placeholder shown while awaiting
+);
+```
+
+| Arguments           |                 Type | Description                                                    |
+| ------------------ | -------------------: | -------------------------------------------------------------- |
+| `key`              |             `string` | The store key to update.                                       |
+| `callback`         | `() => Promise<any>` | Async producer that resolves to the value to store.            |
+| `placeholderValue` |     `any`  | (optional) Temporary value written immediately while awaiting `callback`. |
+
 ---

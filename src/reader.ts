@@ -69,6 +69,9 @@ export class Reader {
             toRerender = true;
         }
         if(toRerender && this.reactListener) {
+            for(let key of this.keys) {
+                this.store.setCurrentValue(key, this.store.getPossibleValue(key));
+            }
             this.reactListener();
         }
     }

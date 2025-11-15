@@ -27,6 +27,12 @@ export class KeyStore {
     }
   }
 
+  setCurrentValue(key: string, value: any) {
+    if(this.state.has(key)) {
+      (this.state.get(key) as keyValue).current = value;
+    }
+  }
+
   getCurrentValue(key: string) {
     return this.state.get(key)?.current;
   }

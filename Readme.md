@@ -30,6 +30,7 @@ npm install react-snap-state
 - Here’s a full working React counter app using react-snap-state 👇
 
 ```tsx
+import React from "react";
 import {
   StoreProvider,
   useGetValue,
@@ -39,6 +40,7 @@ import {
 
 function Counter() {
   console.log("render successfully");
+
   // useGetValue with a comparator
   const count = useGetValue(
     "count",
@@ -48,20 +50,20 @@ function Counter() {
   // useGetValue without a comparator
   const alignment = useGetValue("alignment");
 
+  // read user (will be set by async setter)
+  const user = useGetValue("user");
+
   // useSetValue
   const setValue = useSetValue();
 
   // useDeriveValue (single key) — returns boolean whether count is even
   const isEven = useDeriveValue(
     ["count"],
-    (c: number[]) => {
-      let number = c[0];
-      if (number % 2 === 0) {
-        return true;
-      }
-      return false;
+    (c: (number | undefined)[]) => {
+      const number = c[0] ?? 0;
+      return number % 2 === 0;
     },
-    (prev: boolean, next: boolean) => prev === next // optional comparator (strict equality)
+    (prev: boolean, next: boolean) => prev === next // optional comparator
   );
 
   // useDeriveValue (multiple keys) — composes a display string from count + alignment
@@ -72,7 +74,7 @@ function Counter() {
       const alignStr = a ?? "center";
       return `${countStr} • ${alignStr}`;
     },
-    (prev: string, next: string) => prev === next // skip re-render if composed string didn't change
+    (prev: string, next: string) => prev === next // comparator
   );
 
   const increment = () => setValue("count", (count ?? 0) + 1);
@@ -82,6 +84,23 @@ function Counter() {
   const leftAlign = () => setValue("alignment", "left");
   const rightAlign = () => setValue("alignment", "right");
   const centerAlign = () => setValue("alignment", "center");
+
+  // Async setter example using fake JSON placeholder
+  // Uses setter.async(key, asyncCallback, placeholder?)
+  // placeholder is written immediately; final value is written after the promise resolves.
+  const loadUser = async () => {
+    // optional: await if you want to wait for completion
+    await setValue.async(
+      "user",
+      async () => {
+        // fetch fake user data
+        const res = await fetch("https://jsonplaceholder.typicode.com/users/1");
+        if (!res.ok) throw new Error("Failed to fetch user");
+        return await res.json();
+      },
+      { id: 0, name: "Loading user…" } // placeholder shown synchronously
+    );
+  };
 
   return (
     <div style={{ textAlign: alignment }}>
@@ -100,13 +119,47 @@ function Counter() {
         <button onClick={centerAlign}>Click to center align</button>
         <button onClick={rightAlign}>Click to right align</button>
       </div>
+
+      <hr style={{ margin: "16px 0" }} />
+
+      <div>
+        <h3>User</h3>
+        {user ? (
+          // if placeholder or fetched user object
+          <div>
+            <p>
+              <strong>ID:</strong> {user.id ?? "—"}
+            </p>
+            <p>
+              <strong>Name:</strong> {user.name ?? "—"}
+            </p>
+            <p>
+              <strong>Email:</strong> {user.email ?? "—"}
+            </p>
+          </div>
+        ) : (
+          <p>No user loaded</p>
+        )}
+
+        <div style={{ marginTop: 8 }}>
+          <button onClick={loadUser}>Load User (async)</button>
+          <button
+            onClick={() =>
+              setValue("user", { id: 0, name: "Cleared", email: "—" })
+            }
+            style={{ marginLeft: 8 }}
+          >
+            Clear User
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
 
 export default function App() {
   return (
-    <StoreProvider initial={{ count: 0, alignment: "center" }}>
+    <StoreProvider initial={{ count: 0, alignment: "center", user: null }}>
       <Counter />
     </StoreProvider>
   );
@@ -114,9 +167,8 @@ export default function App() {
 
 ```
 
-- Result: Only the Counter component re-renders when count changes or the alignment changes.
-- No context re-renders, no prop drilling, no boilerplate.
 - Try it out: https://codesandbox.io/p/sandbox/dl2znt
+- Please check the below API reference to understand the code.
 
 ---
 ## ⚙️ Setup

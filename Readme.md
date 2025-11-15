@@ -30,11 +30,20 @@ npm install react-snap-state
 - Here’s a full working React counter app using react-snap-state 👇
 
 ```tsx
-import { StoreProvider, useGetValue, useSetValue, useDeriveValue } from "react-snap-state";
+import {
+  StoreProvider,
+  useGetValue,
+  useSetValue,
+  useDeriveValue,
+} from "react-snap-state";
 
 function Counter() {
+  console.log("render successfully");
   // useGetValue with a comparator
-  const count = useGetValue("count", (oldValue: number, newValue: number) => oldValue === newValue);
+  const count = useGetValue(
+    "count",
+    (oldValue: number, newValue: number) => oldValue === newValue
+  );
 
   // useGetValue without a comparator
   const alignment = useGetValue("alignment");
@@ -47,7 +56,7 @@ function Counter() {
     ["count"],
     (c: number[]) => {
       let number = c[0];
-      if(number % 2 === 0) {
+      if (number % 2 === 0) {
         return true;
       }
       return false;
@@ -82,14 +91,14 @@ function Counter() {
 
       <div style={{ marginTop: 12 }}>
         <button onClick={increment}>Increment</button>
-        <button onClick={decrement}>Decrement</button>
         <button onClick={reset}>Reset</button>
+        <button onClick={decrement}>Decrement</button>
       </div>
 
       <div style={{ marginTop: 12 }}>
         <button onClick={leftAlign}>Click to left align</button>
-        <button onClick={rightAlign}>Click to right align</button>
         <button onClick={centerAlign}>Click to center align</button>
+        <button onClick={rightAlign}>Click to right align</button>
       </div>
     </div>
   );
@@ -102,6 +111,7 @@ export default function App() {
     </StoreProvider>
   );
 }
+
 ```
 
 - Result: Only the Counter component re-renders when count changes or the alignment changes.

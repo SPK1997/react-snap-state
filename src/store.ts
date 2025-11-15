@@ -1,45 +1,73 @@
 import { isObjectLiteral } from "./helper";
+import { Reader } from "./reader";
 
-type Listener = () => void;
+type keyValue = {
+  current: any;
+  possible: any;
+};
 
 export class KeyStore {
-  private state = new Map<string, any>();
-  private keyListeners = new Map<string, Set<Listener>>();
+  private state = new Map<string, keyValue>();
+  private keyReaders = new Map<string, Set<Reader>>();
 
   constructor(initial?: Record<string, any>) {
-    if(initial) {
-      if(isObjectLiteral(initial)) {
-        for (const k of Object.keys(initial)) {
-          this.state.set(k, initial[k])
+    if (initial) {
+      if (isObjectLiteral(initial)) {
+        for (const [k, v] of Object.entries(initial)) {
+          this.state.set(k, {
+            current: v,
+            possible: v,
+          });
         }
       } else {
-        throw new Error('Initial state must be a plain object (e.g. {count: 0})');
+        throw new Error(
+          "Initial state must be a plain object (e.g. {count: 0})"
+        );
       }
     }
   }
 
-  get(key: string): any | undefined { return this.state.get(key); }
+  getCurrentValue(key: string) {
+    return this.state.get(key)?.current;
+  }
 
-  set(key: string, val: any, comparator?:((a: any, b:any) => boolean) | null) {
-    const prev = this.state.get(key);
-    if(comparator && comparator(prev, val)) return;
-    if (!comparator && Object.is(prev, val)) return;
-    this.state.set(key, val);
+  getPossibleValue(key: string) {
+    return this.state.get(key)?.possible;
+  }
+
+  set(key: string, val: any) {
+    let stored = this.state.get(key);
+    let toStore: keyValue;
+    if (!stored) {
+      toStore = {
+        current: val,
+        possible: val,
+      };
+    } else {
+      toStore = {
+        current: stored["current"],
+        possible: val,
+      };
+    }
+    this.state.set(key, toStore);
     this.emitKey(key);
   }
 
-  subscribeKey(key: string, l: Listener): () => void {
-    let bucket = this.keyListeners.get(key);
-    if (!bucket) this.keyListeners.set(key, (bucket = new Set()));
-    bucket.add(l);
+  subscribeKey(key: string, reader: Reader): () => void {
+    let bucket = this.keyReaders.get(key);
+    if (!bucket) this.keyReaders.set(key, (bucket = new Set()));
+    bucket.add(reader);
     return () => {
-      bucket!.delete(l);
-      if (!bucket!.size) this.keyListeners.delete(key);
+      bucket!.delete(reader);
+      if (!bucket!.size) this.keyReaders.delete(key);
     };
   }
 
   private emitKey(key: string) {
-    const bucket = this.keyListeners.get(key);
-    if (bucket) for (const l of bucket) l();
+    const bucket = this.keyReaders.get(key);
+    if (bucket)
+      for (const reader of bucket) {
+        reader.checkAndRerender();
+      }
   }
 }

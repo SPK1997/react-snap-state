@@ -19,7 +19,7 @@ function createReader(iOptions:readerOptions) {
 
 export function useGetValue(key: string, comparator: comparator = undefined): any | undefined {
   const store = useStoreInstance();
-  const reader = useMemo(() => createReader({store: store, keys: [key], comparator: comparator}), [store, key, comparator]);
+  const reader = useMemo(() => createReader({store: store, keys: [key], comparator: comparator}), []);
   const getSnap = useCallback(() => reader.getSnapshot(), [reader]);
 
   return useSyncExternalStore(
@@ -37,7 +37,7 @@ export function useGetValue(key: string, comparator: comparator = undefined): an
 export function useDeriveValue(keys: string[] | string, derive:derive, comparator: comparator = undefined): any | undefined {
   const store = useStoreInstance();
   const keyList = Array.isArray(keys) ? keys : [keys];
-  const reader = useMemo(() => createReader({store: store, keys: keyList, comparator: comparator, derive: derive}), [store, keyList, comparator, derive]);
+  const reader = useMemo(() => createReader({store: store, keys: keyList, comparator: comparator, derive: derive}), []);
   const getSnap = useCallback(() => reader.getSnapshot(), [reader]);
   return useSyncExternalStore(
     (listener) => {

@@ -30,7 +30,7 @@ npm install react-snap-state
 - Here’s a full working React app using react-snap-state full capabilities 👇
 
 ```tsx
-import React from "react";
+import React, {useCallback, useMemo} from "react";
 import {
   StoreProvider,
   useGetValue,
@@ -42,9 +42,10 @@ function Counter() {
   console.log("render successfully");
 
   // useGetValue with a comparator
+  const comparator1 = useCallback((oldValue: number, newValue: number) => oldValue === newValue, []);
   const count = useGetValue(
     "count",
-    (oldValue: number, newValue: number) => oldValue === newValue
+    comparator1
   );
 
   // useGetValue without a comparator
@@ -57,24 +58,30 @@ function Counter() {
   const setValue = useSetValue();
 
   // useDeriveValue (single key) — returns boolean whether count is even
+  const keyList1 = useMemo(() => ["count"], []);
+  const deriveCallback1 = useCallback((c: (number | undefined)[]) => {
+    const number = c[0] ?? 0;
+    return number % 2 === 0;
+  }, []);
+  const comparator2 = useCallback((prev: boolean, next: boolean) => prev === next, []);
   const isEven = useDeriveValue(
-    ["count"],
-    (c: (number | undefined)[]) => {
-      const number = c[0] ?? 0;
-      return number % 2 === 0;
-    },
-    (prev: boolean, next: boolean) => prev === next // optional comparator
+    keyList1,
+    deriveCallback1,
+    comparator2 // optional comparator
   );
 
   // useDeriveValue (multiple keys) — composes a display string from count + alignment
+  const keyList2 = useMemo(() => ["count", "alignment"], []);
+  const deriveCallback2 = useCallback(([c, a]: [number | undefined, string | undefined]) => {
+    const countStr = typeof c === "number" ? String(c) : "—";
+    const alignStr = a ?? "center";
+    return `${countStr} • ${alignStr}`;
+  }, []);
+  const comparator3 = useCallback((prev: string, next: string) => prev === next, []);
   const display = useDeriveValue(
-    ["count", "alignment"],
-    ([c, a]: [number | undefined, string | undefined]) => {
-      const countStr = typeof c === "number" ? String(c) : "—";
-      const alignStr = a ?? "center";
-      return `${countStr} • ${alignStr}`;
-    },
-    (prev: string, next: string) => prev === next // comparator
+    keyList2,
+    deriveCallback2,
+    comparator3 // comparator
   );
 
   const increment = () => setValue("count", (count ?? 0) + 1);
@@ -228,14 +235,19 @@ import {StoreProvider} from 'react-snap-state';
   - If it returns false, the hook updates its value then component re-renders.
   - If no comparator is provided then default Object.is() is used.
 
+- On calling useGetValue a reader instance is created. The reader is created once and captures the keys and comparator (optional) from the first render. If any of these values change later, the reader will not update so they must be passed as stable (memoized) references.
+
 ```tsx
 import {useGetValue} from 'react-snap-state';
+import {useCallback} from 'react';
 
 // without custom comparator
 const value1 = useGetValue("count");
 
 // with custom comparator
-const value2 = useGetValue("age", (before: number, after: number) => {return before === after});
+// referentially stable callback is needed
+let comparator = useCallback((before: number, after: number) => {return before === after}, []);
+const value2 = useGetValue("age", comparator);
 ```
 
 | Arguments     | Type      | Description                       |
@@ -264,19 +276,27 @@ const value2 = useGetValue("age", (before: number, after: number) => {return bef
   - If comparator returns false then derived value is updated then component re-renders.
   - If no comparator is provided then default Object.is() is used.
 
+- On calling useDeriveValue a reader instance is created. The reader is created once and captures the keys, derive function, and comparator (optional) from the first render. If any of these values change later, the reader will not update so they must be passed as stable (memoized) references.
+
 ```tsx
 import {useDeriveValue} from 'react-snap-state';
+import {useMemo, useCallback} from 'react';
 
 // derive without comparator
-const total = useDeriveValue(["price", "tax"], ([price, tax]) => {
+let keyList1 = useMemo(() => ["price", "tax"], []); // stable key list
+let deriveCallback1 = useCallback(([price, tax]) => {
   return price + tax;
-});
+}, []); // stable derive callback
+const total = useDeriveValue(keyList1, deriveCallback1);
 
 // derive with a comparator
+let keyList2 = useMemo(() => ["age"], []); // stable key list
+let deriveCallback2 = useCallback((age) => (age >= 18 ? "adult" : "minor"), []); // stable derive callback
+let comparator = useCallback((prev, next) => prev === next, []); // stable comparator
 const ageStatus = useDeriveValue(
-  ["age"],
-  (age) => (age >= 18 ? "adult" : "minor"),
-  (prev, next) => prev === next // comparator
+  keyList2,
+  deriveCallback2,
+  comparator
 );
 ```
 | Arguments       | Type                                                     | Description                                                                                                                        |

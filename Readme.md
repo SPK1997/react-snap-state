@@ -27,7 +27,7 @@ npm install react-snap-state
 ---
 
 ## 🧱 Quick Start Example
-- Here’s a full working React counter app using react-snap-state 👇
+- Here’s a full working React app using react-snap-state full capabilities 👇
 
 ```tsx
 import React from "react";

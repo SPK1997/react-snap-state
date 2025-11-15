@@ -4,7 +4,7 @@ import { StoreContext } from "./context";
 import { Reader, readerOptions } from "./reader";
 
 type comparator = ((a: any, b:any) => boolean) | undefined;
-type derive = (params:any[]) => any;
+type derive = (params:any[] | any) => any;
 
 
 function useStoreInstance() {

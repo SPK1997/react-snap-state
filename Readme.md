@@ -1,18 +1,19 @@
 # ⚡ react-snap-state
 
-A **tiny, fast, and reactive state management library for React 17+**, built on top of `useSyncExternalStore`.  
-`react-snap-state` provides **key-based subscriptions**, **no context re-renders**, and a super simple API that feels like React itself.
+A **tiny, fast, and reactive state management library for React 17+**, built on top of `useSyncExternalStore`
+this provides **key-based subscriptions**, **no context re-renders**, and a super simple API that feels like React itself.
 
 ---
 
 ## ✨ Features
 
-- 🔑 **Key-based reactivity** – Components re-render only for the keys they care about.
-- ⚛️ **Concurrent React safe** – Built on `useSyncExternalStore`, ensuring future-proof React compatibility.
-- 💡 **No context re-renders** – The context never changes; only subscribed components update.
-- 🧩 **Minimal API** – Just `StoreProvider`, `useGetValue`, and `useSetValue`.
-- ⚙️ **TypeScript-first** – Fully typed, auto-completion friendly.
-- ⚡ **Lightweight** – Less than 15KB of unpacked size.
+- **🔑 Key-based reactivity** – Components only re-render for the specific keys they subscribe to.
+- **🧠 Smart reads, simple writes** – Writes update the store directly, while reads may use a custom comparator to control equality checks.
+- **🌐 Scoped state** – Wrap parts of your app with StoreProvider to isolate independent store instances.
+- **🧩 Tiny API surface** – Just StoreProvider, useGetValue, useSetValue, and useDeriveValue.
+- **⚛️ Built for Concurrent React** – Powered by useSyncExternalStore for stable, future-proof behavior.
+- **🚫 No context-driven re-renders** – The context value never changes; only components subscribed to specific keys update.
+- **⚙️ TypeScript-first design** – End-to-end typing.
 
 ---
 
@@ -29,101 +30,92 @@ npm install react-snap-state
 - Here’s a full working React counter app using react-snap-state 👇
 
 ```tsx
-import { StoreProvider, useGetValue, useSetValue } from "react-snap-state";
+import { StoreProvider, useGetValue, useSetValue, useDeriveValue } from "react-snap-state";
 
 function Counter() {
-  const count = useGetValue({ key: "count" });
+  // useGetValue with a comparator
+  const count = useGetValue("count", (oldValue: number, newValue: number) => oldValue === newValue);
+
+  // useGetValue without a comparator
+  const alignment = useGetValue("alignment");
+
+  // useSetValue
   const setValue = useSetValue();
 
-  // with custom comparator function (check Readme for API documentation)
-  const increment = () =>
-    setValue({
-      key: "count",
-      value: (count ?? 0) + 1,
-      comparator: (oldValue: number, newValue: number) => oldValue === newValue,
-    });
+  // useDeriveValue (single key) — returns boolean whether count is even
+  const isEven = useDeriveValue(
+    "count",
+    (c: number | undefined) => (typeof c === "number" ? c % 2 === 0 : true),
+    (prev: boolean, next: boolean) => prev === next // optional comparator (strict equality)
+  );
 
-  // without custom comparator function (check Readme for API documentation)
-  const decrement = () => setValue({ key: "count", value: (count ?? 0) - 1 });
-  const reset = () => setValue({ key: "count", value: 0 });
+  // useDeriveValue (multiple keys) — composes a display string from count + alignment
+  const display = useDeriveValue(
+    ["count", "alignment"],
+    ([c, a]: [number | undefined, string | undefined]) => {
+      const countStr = typeof c === "number" ? String(c) : "—";
+      const alignStr = a ?? "center";
+      return `${countStr} • ${alignStr}`;
+    },
+    (prev: string, next: string) => prev === next // skip re-render if composed string didn't change
+  );
+
+  const increment = () => setValue("count", (count ?? 0) + 1);
+  const decrement = () => setValue("count", (count ?? 0) - 1);
+  const reset = () => setValue("count", 0);
+
+  const leftAlign = () => setValue("alignment", "left");
+  const rightAlign = () => setValue("alignment", "right");
+  const centerAlign = () => setValue("alignment", "center");
 
   return (
-    <div style={{ textAlign: "center" }}>
+    <div style={{ textAlign: alignment }}>
       <h2>Count: {count}</h2>
-      <button onClick={increment}>Increment</button>
-      <button onClick={decrement}>Decrement</button>
-      <button onClick={reset}>Reset</button>
+      <p>Derived display: {display}</p>
+      <p>Status: {isEven ? "Even" : "Odd"}</p>
+
+      <div style={{ marginTop: 12 }}>
+        <button onClick={increment}>Increment</button>
+        <button onClick={decrement}>Decrement</button>
+        <button onClick={reset}>Reset</button>
+      </div>
+
+      <div style={{ marginTop: 12 }}>
+        <button onClick={leftAlign}>Click to left align</button>
+        <button onClick={rightAlign}>Click to right align</button>
+        <button onClick={centerAlign}>Click to center align</button>
+      </div>
     </div>
   );
 }
 
 export default function App() {
   return (
-    <StoreProvider initial={{ count: 0 }}>
+    <StoreProvider initial={{ count: 0, alignment: "center" }}>
       <Counter />
     </StoreProvider>
   );
 }
 ```
 
-- Result: Only the Counter component re-renders when count changes.
+- Result: Only the Counter component re-renders when count changes or the alignment changes.
 - No context re-renders, no prop drilling, no boilerplate.
 - Try it out: https://codesandbox.io/p/sandbox/dl2znt
 
 ---
-
 ## ⚙️ Setup
 
-- Wrap your app (or any subtree) with the StoreProvider:
-
-```tsx
-import { StoreProvider } from "react-snap-state";
-
-function App() {
-  return (
-    <StoreProvider initial={{ theme: "light", count: 0 }}>
-      <MyComponent />
-    </StoreProvider>
-  );
-}
-```
+- Check the StoreProvider API in API reference section.
 ---
+## 🔍 Reading State 
 
-## 🔍 Reading State – useGetValue
-
-- Read any key from the store. The hook automatically subscribes to changes on that key.
-
-```tsx
-import { useGetValue } from "react-snap-state";
-
-function DisplayCount() {
-  const count = useGetValue({ key: "count" });
-  return <h2>Current count: {count}</h2>;
-}
-```
-
-- Non-reactive read (snapshot only)
-
-```tsx
-const staticValue = useGetValue({ key: "count", reactive: false });
-```
-
+- This is possible using 2 hooks: useGetValue and useDeriveValue
+- Check their respective APIs in API reference section
 ---
+## ✏️ Updating State
 
-## ✏️ Updating State – useSetValue
-
-- Write values to the store by key.
-
-```tsx
-import { useSetValue } from "react-snap-state";
-
-const setValue = useSetValue();
-
-function UpdateButton() {
-  setValue({ key: "status", value: "active" });
-  return null;
-}
-```
+- This is possible using useSetValue hook.
+- Check its API in API reference section.
 
 ---
 ## 🧩 API Reference
@@ -133,6 +125,8 @@ function UpdateButton() {
 - Wrap your app or any subtree. It creates one stable `KeyStore` instance and exposes it via context.
 
 ```tsx
+import {StoreProvider} from 'react-snap-state';
+
 <StoreProvider initial={{ count: 0 }}>
   {children}
 </StoreProvider>
@@ -143,39 +137,101 @@ function UpdateButton() {
 | `initial`  | `Record<string, any>` | Optional initial state.               |
 | `children` | `React.ReactNode`     | Components that can access the store. |
 
-### 🔍 useGetValue({ key, reactive? })
+### 🔍 useGetValue(key, comparator?)
+- useGetValue lets your component read a value from the store and automatically subscribe to updates for that specific key.
 
-- Reads the current value of a key and (optionally) subscribes to updates.
+- Whenever the key's value changes, the hook will trigger a component re-render, unless a custom comparator determines that the new value is equal to the previous one.
+
+- ✔ What it does
+  - Reads the current value of a given key from the store.
+  - Subscribes the component to updates for that key.
+  - Re-renders the component when the key's value changes.
+  - Accepts an optional comparator to control equality checks.
+  - If no comparator is provided, the default Object.is() equality logic is used.
+
+- ✔ Comparator behavior
+  - If a custom comparator is passed, it receives (oldValue, newValue).
+  - If it returns true, values are treated as equal then no re-render is triggered.
+  - If it returns false, the hook updates its value then component re-renders.
+  - If no comparator is provided then default Object.is() is used.
 
 ```tsx
-const value = useGetValue({ key: "count" });
+import {useGetValue} from 'react-snap-state';
+
+// without custom comparator
+const value1 = useGetValue("count");
+
+// with custom comparator
+const value2 = useGetValue("age", (before: number, after: number) => {return before === after});
 ```
 
-| Option     | Type      | Default | Description                       |
-| ---------- | --------- | ------- | --------------------------------- |
-| `key`      | `string`  | —       | Key to read from the store.       |
-| `reactive` | `boolean` | `true`  | Subscribe to key updates if true. |
+| Arguments     | Type      | Description                       |
+| --------------| --------- | ---------------------------------------- |
+| `key`         | `string`  | Key to read from the store.       |
+| `comparator`  | `(oldValue: any, newValue: any) => boolean` | (Optional) Custom comparator to determine equality. Return true if values are considered equal (no update), or false to trigger an update. |
+
+### 🛠️ useDeriveValue(key (or keys), derive, comparator?)
+- useDeriveValue lets your component compute a derived value from one or more store keys and automatically subscribe to updates for all of them.
+
+- Whenever any of the source key values change, the hook will trigger a component re-render, unless a custom comparator determines that the derived output is equal to the previous one.
+
+- ✔ What it does?
+  - Accepts either a single key or an array of keys.
+  - Reads the current value(s) of the key(s) from the store.
+  - Passes those values into your derive callback function.
+  - Returns whatever the derive callback returns.
+  - Automatically subscribes to updates of all referenced keys.
+  - Re-renders the component only when:
+      - Any key's value changes, AND
+      - The comparator (if provided) determines the derived output has changed.
+
+- ✔ Comparator behavior
+  - If you pass a comparator, it will be used to compare previous derived value vs new derived value.
+  - If comparator returns true then values are considered equal then no re-render.
+  - If comparator returns false then derived value is updated then component re-renders.
+  - If no comparator is provided then default Object.is() is used.
+
+```tsx
+import {useDeriveValue} from 'react-snap-state';
+
+// derive from single key
+const fullName = useDeriveValue("user", (user) => {
+  return `${user.firstName} ${user.lastName}`;
+});
+
+// derive from multiple keys
+const total = useDeriveValue(["price", "tax"], ([price, tax]) => {
+  return price + tax;
+});
+
+// derive with a comparator
+const ageStatus = useDeriveValue(
+  "age",
+  (age) => (age >= 18 ? "adult" : "minor"),
+  (prev, next) => prev === next // comparator
+);
+```
+| Arguments       | Type                                                     | Description                                                                                                                        |
+| -------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `key` / `keys` | `string` or `string[]`                                    | A single key or an array of keys to read from the store. Their values will be passed to the derive callback.                       |
+| `derive`       | `(value: any \| any[]) => any`                           | A function that receives the value(s) of the key(s) and returns the derived value.                                                 |
+| `comparator`   | `(oldValue: any, newValue: any) => boolean`| (Optional) Custom equality check for the **derived value**. Return `true` if values are equal (skip update), or `false` to trigger an update. |
+
 
 ### ✏️ useSetValue()
 
-- Returns a function which is used to write a value to the store.
-- If the new value differs (by reference for non-primitives and by value for primitives), subscribers of that key are notified.
-- optionally a custom comparator callback function can be passed to control how equality is checked.
-- If custom comparator is provided the default comparison will be skipped. 
+- useSetValue lets your component update a value in the store by returning a setter function.
+
+- When this setter is called, the store updates the key’s value and triggers re-renders in all components subscribed to that key.
 
 ```tsx
+import {useSetValue} from 'react-snap-state';
 const setValue = useSetValue();
-
-// Basic Usage
-setValue({ key: "theme", value: "dark" }); 
-
-// With a custom comparator
-setValue({ key: "theme", value: "red", comparator: (old: string, new: string) => return old === new }); 
+setValue("age", 45); 
 ```
 
-| Option       | Type                                        | Description                                                                                                                                      |
+| Arguments       | Type                                        | Description                                                                                                                                      |
 | ------------ | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `key`        | `string`                                    | The key in the store to update.                                                                                                                  |
-| `value`      | `any`                                       | The new value to assign.                                                                                                                         |
-| `comparator` | `(oldValue: any, newValue: any) => boolean` | *(Optional)* Custom comparator to determine equality. Return `true` if values are considered equal (no update), or `false` to trigger an update. |
-
+| `value`      | `any`                                       | The new value to assign.                                                                                                                  
+---

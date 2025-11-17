@@ -1,7 +1,7 @@
 {
   "name": "react-snap-state",
   "type": "module",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "Lighweight state management using keys in react",
   "main": "dist/main.bundle.js",
   "types": "dist/types/index.d.ts",

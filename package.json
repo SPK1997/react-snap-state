@@ -5,12 +5,12 @@
   "description": "Lighweight state management using keys in react",
   "main": "dist/main.bundle.cjs",
   "module": "dist/main.bundle.mjs",
-  "types": "dist/types/index.d.ts",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/main.bundle.mjs",
       "require": "./dist/main.bundle.cjs",
-      "types": "./dist/types/index.d.ts"
+      "types": "./dist/index.d.ts"
     }
   },
   "author": "SPK1997",
@@ -29,7 +29,7 @@
   ],
   "scripts": {
     "clean": "rimraf dist",
-    "types": "tsc -p tsconfig.json",
+    "types": "tsc -p tsconfig.json && rollup -c scripts/rollup.dts.config.js && rimraf dist/types",
     "build": "npm run clean && npm run types && webpack --config webpack.config.js",
     "release:patch": "npm run build && npm version patch && npm publish",
     "release:minor": "npm run build && npm version minor && npm publish",
@@ -51,6 +51,8 @@
     "@types/use-sync-external-store": "^1.5.0",
     "babel-loader": "^10.0.0",
     "rimraf": "^6.1.0",
+    "rollup": "^4.53.2",
+    "rollup-plugin-dts": "^6.2.3",
     "webpack": "^5.102.1",
     "webpack-cli": "^6.0.1"
   },

@@ -14,6 +14,7 @@ this provides **key-based subscriptions**, **no context re-renders**, and a supe
 - **⚛️ Built for Concurrent React** – Powered by useSyncExternalStore for stable, future-proof behavior.
 - **🚫 No context-driven re-renders** – The context value never changes; only components subscribed to specific keys update.
 - **⚙️ TypeScript-first design** – End-to-end typing.
+- **⚛️ React 17+ support** - React 17 support is provided by the use-sync-external-store/shim included with the package.
 
 ---
 
